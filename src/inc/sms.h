@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #define MAX (2)
+//#define DBG
+#ifdef DBG
+#define DEBUG(fmt, args...)   printf("DEBUG: %s:%s:%d: " fmt, __FILE__, __func__,__LINE__, ##args)
+#else 
+#define DEBUG(fmt, args...) /* do nothing */
+#endif
 // DECLARATIONS 
 typedef struct date
 {
@@ -46,4 +52,5 @@ typedef struct student_details
     unsigned long phone_no;
     branch_t branch;
     date_t dob;
+    struct student_details *next;
 }student_t;

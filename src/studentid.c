@@ -1,7 +1,9 @@
 #include "sms.h"
+#include <stdlib.h>
 // VARIABLE DEFINITIONS
 student_t a[MAX];
 int count=0;
+student_t *list = NULL;
 
 branch_t usn_to_branch(char* usn)
 {
@@ -23,49 +25,13 @@ branch_t usn_to_branch(char* usn)
     return (br_lookup[i].num); 
 }
 
-int create_entry(void)
+const char * br_num_to_name(branch_t branch)
 {
-    int result;
-    if(count==MAX)
-    {
-        printf("memory is full!!\n");
-        return (-1);
-    }
-    printf("----------------------------------\n");
-    printf("enter the details of the student:\n");
-    printf("----------------------------------\n");
-    printf("Enter name: ");
-    scanf("%s",a[count].name);
-    printf("Enter DOB (dd-mm-yyyy): ");
-    scanf("%hu-%hu-%hu",&a[count].dob.day, 
-            &a[count].dob.month, &a[count].dob.year);
-    printf("Enter phone number: ");
-    scanf("%lu",&a[count].phone_no);
-    do
-    {
-        printf("Enter usn: ");
-        scanf("%s",a[count].usn);
-        result = usn_to_branch(a[count].usn);
-        if(result == (-1))
-        {
-            printf("wrong usn!!\n");
-        }
-    }while(result == (-1));
-    a[count].branch = result;
-    printf("%d\n", a[count].branch);
-    printf("Enter admission number: ");
-    scanf("%u",&a[count].adm_no);
-    count++;
-    return 0;
-}
-
-const char * br_num_to_name(int i)
-{
-    printf("%d\n", a[i].branch);
+    printf("%d\n", branch);
     int j;
     for(j=0;j<MAX_BRANCH; j++)
     {
-        if(br_lookup[j].num == a[i].branch)
+        if(br_lookup[j].num == branch)
         {   
            
            return (br_lookup[j].name);
@@ -73,46 +39,93 @@ const char * br_num_to_name(int i)
     }
 }
         
-            
-int print_entry(int i)
+int create_entry(student_t **head)
 {
-    char branch[50];
-    if(i>=MAX)
+    int result;
+    student_t *new = NULL;
+    new = malloc(sizeof(student_t));
+    if(new == NULL)
     {
-        printf("invalid index: %d\n",i);
+        printf("memory is not allocated\n");
+        return (-1);
+    }
+    printf("----------------------------------\n");
+    printf("Enter the details of the student:\n");
+    printf("----------------------------------\n");
+    printf("Enter name: ");
+    scanf("%s",new->name);
+    printf("Enter DOB (dd-mm-yyyy): ");
+    scanf("%hu-%hu-%hu", &new->dob.day, 
+            &new->dob.month, &new->dob.year);
+    printf("Enter phone number: ");
+    scanf("%lu", &new->phone_no);
+    do
+    {
+        printf("Enter usn: ");
+        scanf("%s",new->usn);
+        result = usn_to_branch(new->usn);
+        if(result == (-1))
+        {
+            printf("wrong usn!!\n");
+        }
+    } while(result == (-1));
+    new->branch = result;
+    DEBUG("%d\n", new->branch);
+    printf("Enter admission number: ");
+    scanf("%u", &new->adm_no);
+    new->next = *head;
+    DEBUG("head = %p\n",*head);
+    *head = new;
+    DEBUG("new = %p\n",new);
+    
+    return 0;
+}
+  
+int print_entry(student_t *head, int adm_no)
+{
+    student_t *ptr = head;
+    while(ptr != NULL)
+    {   
+        DEBUG("ADMISSION NUMBER = %d %d",ptr->adm_no,adm_no);
+        if(ptr->adm_no == adm_no)
+        {
+            break;
+        }
+        ptr = ptr->next;
+    }
+    if(ptr == NULL)
+    {
         return (-1);
     }
     printf("----------------------------------\n");
     printf("The student details are:\n");
     printf("----------------------------------\n");   
-    printf("Name: %s\n",a[i].name);
-    printf("DOB (dd-mm-yyyy): %hu-%hu-%hu\n",a[i].dob.day, 
-            a[i].dob.month, a[i].dob.year);
-    printf("Phone number: %lu\n",a[i].phone_no);
-    printf("Branch: %s\n",br_num_to_name(i));
-    printf("usn: %s\n",a[i].usn);
-    printf("Admission number: %u\n",a[i].adm_no);
+    printf("Name: %s\n",ptr->name);
+    printf("DOB (dd-mm-yyyy): %hu-%hu-%hu\n",ptr->dob.day, 
+            ptr->dob.month, ptr->dob.year);
+    printf("Phone number: %lu\n",ptr->phone_no);
+    printf("Branch: %s\n",br_num_to_name(ptr->branch));
+    printf("usn: %s\n",ptr->usn);
+    printf("Admission number: %u\n",ptr->adm_no);
     return 0;
 }
-    
+
         
-    
-    
-    
-
-
-
-int print_report()
-{}
 
 int main()
 {
-    create_entry();
-    create_entry();
-    
-    print_entry(0);
-    print_entry(1);
-    
-    
-    
+    int result = 0;
+    int adm_no = 0;   
+    create_entry(&list);
+     
+    do
+    {
+        printf("Enter adm.no: ");
+        scanf("%d",&adm_no);
+        result = print_entry(list, adm_no);
+        if(result == (-1))
+        {
+            printf("Details not found\n");
+        }
+    } while(result == (-1));  
 }
